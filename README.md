@@ -96,10 +96,11 @@ frames.
 ## Caveats
 
 - Long-lived spans. The connection span lives for the full duration
-  of the WebSocket — which can be minutes or hours. Tempo handles
-  long-lived spans, but be aware they don't appear in search until
-  they end. The OTel messaging-spec proposal endorses the
-  "session"-style span for WebSocket-like transports.
+  of the WebSocket — which can be minutes or hours. Tracing backends
+  generally handle long-lived spans, but be aware they typically
+  don't appear in search until they end. The OTel messaging-spec
+  proposal endorses the "session"-style span for WebSocket-like
+  transports.
 - The wrapper calls `OTel.tracerProvider().getTracer(...)` in its
   constructor — `OTel.initialize()` must have run first.
 - `addStream` is forwarded transparently to the inner sink and

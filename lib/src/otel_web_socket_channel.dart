@@ -84,9 +84,9 @@ class OTelWebSocketChannel
     if (url != null) {
       attrs[Url.urlFull.key] = url.toString();
       if (url.host.isNotEmpty) {
-        attrs[ServerResource.serverAddress.key] = url.host;
+        attrs[Server.serverAddress.key] = url.host;
       }
-      if (url.hasPort) attrs[ServerResource.serverPort.key] = url.port;
+      if (url.hasPort) attrs[Server.serverPort.key] = url.port;
     }
     _span = _tracer.startSpan(
       url == null ? 'websocket' : 'websocket ${url.host}',
@@ -207,7 +207,7 @@ class OTelWebSocketChannel
     if (_ended || _suppressed) return;
     _span!.addAttributes(OTel.attributes([
       OTel.attributeString(
-        ErrorResource.errorType.key,
+        ErrorAttributes.errorType.key,
         error.runtimeType.toString(),
       ),
     ]));
