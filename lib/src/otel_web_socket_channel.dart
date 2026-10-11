@@ -3,7 +3,7 @@
 
 import 'dart:async';
 
-import 'package:dartastic_opentelemetry/dartastic_opentelemetry.dart';
+import 'package:dartastic_opentelemetry_api/dartastic_opentelemetry_api.dart';
 import 'package:stream_channel/stream_channel.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
@@ -69,11 +69,11 @@ class OTelWebSocketChannel
   OTelWebSocketChannel(
     this._inner, {
     Uri? url,
-    Tracer? tracer,
+    APITracer? tracer,
     this.recordFrames = false,
   })  : _suppressed = webSocketInstrumentationSuppressed(),
         _tracer = tracer ??
-            OTel.tracerProvider().getTracer(
+            OTelAPI.tracerProvider().getTracer(
               'otel_web_socket_channel',
             ) {
     if (_suppressed) return;
@@ -91,7 +91,7 @@ class OTelWebSocketChannel
     _span = _tracer.startSpan(
       url == null ? 'websocket' : 'websocket ${url.host}',
       kind: SpanKind.client,
-      attributes: OTel.attributesFromMap(attrs),
+      attributes: OTelAPI.attributesFromMap(attrs),
     );
 
     // Watch for connection success/failure. Surface the negotiated
@@ -100,8 +100,8 @@ class OTelWebSocketChannel
       (_) {
         final p = _inner.protocol;
         if (p != null && p.isNotEmpty) {
-          _span!.addAttributes(OTel.attributes([
-            OTel.attributeString(WebSocketSemantics.protocol.key, p),
+          _span!.addAttributes(OTelAPI.attributes([
+            OTelAPI.attributeString(WebSocketSemantics.protocol.key, p),
           ]));
         }
       },
@@ -117,7 +117,7 @@ class OTelWebSocketChannel
   factory OTelWebSocketChannel.connect(
     Uri url, {
     Iterable<String>? protocols,
-    Tracer? tracer,
+    APITracer? tracer,
     bool recordFrames = false,
   }) {
     final inner = WebSocketChannel.connect(url, protocols: protocols);
@@ -130,7 +130,7 @@ class OTelWebSocketChannel
   }
 
   final WebSocketChannel _inner;
-  final Tracer _tracer;
+  final APITracer _tracer;
   final bool _suppressed;
 
   /// Whether per-frame child spans are emitted. See class docs.
@@ -191,22 +191,22 @@ class OTelWebSocketChannel
     final attrs = <Attribute<Object>>[];
     final code = closeCode ?? _inner.closeCode;
     if (code != null) {
-      attrs.add(OTel.attributeInt(WebSocketSemantics.closeCode.key, code));
+      attrs.add(OTelAPI.attributeInt(WebSocketSemantics.closeCode.key, code));
     }
     final reason = closeReason ?? _inner.closeReason;
     if (reason != null && reason.isNotEmpty) {
       attrs.add(
-        OTel.attributeString(WebSocketSemantics.closeReason.key, reason),
+        OTelAPI.attributeString(WebSocketSemantics.closeReason.key, reason),
       );
     }
-    if (attrs.isNotEmpty) _span!.addAttributes(OTel.attributes(attrs));
+    if (attrs.isNotEmpty) _span!.addAttributes(OTelAPI.attributes(attrs));
     _span!.end();
   }
 
   void _setError(Object error, StackTrace stackTrace) {
     if (_ended || _suppressed) return;
-    _span!.addAttributes(OTel.attributes([
-      OTel.attributeString(
+    _span!.addAttributes(OTelAPI.attributes([
+      OTelAPI.attributeString(
         ErrorAttributes.errorType.key,
         error.runtimeType.toString(),
       ),
@@ -222,8 +222,8 @@ class OTelWebSocketChannel
     final type = frame is String ? 'text' : 'binary';
     final span = _tracer.startSpan(
       'websocket.$operation',
-      parentSpan: _span,
-      attributes: OTel.attributesFromMap(<String, Object>{
+      context: Context.current.withSpan(_span!),
+      attributes: OTelAPI.attributesFromMap(<String, Object>{
         WebSocketSemantics.operation.key: operation,
         WebSocketSemantics.frameType.key: type,
         if (size != null) WebSocketSemantics.frameSize.key: size,
