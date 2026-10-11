@@ -222,7 +222,7 @@ class OTelWebSocketChannel
     final type = frame is String ? 'text' : 'binary';
     final span = _tracer.startSpan(
       'websocket.$operation',
-      parentSpan: _span,
+      context: Context.current.withSpan(_span!),
       attributes: OTel.attributesFromMap(<String, Object>{
         WebSocketSemantics.operation.key: operation,
         WebSocketSemantics.frameType.key: type,
