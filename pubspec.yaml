@@ -3,7 +3,7 @@ description: >-
   OpenTelemetry instrumentation for `package:web_socket_channel`. Wraps a
   channel to emit a connection-lifetime span, opt-in per-frame events and
   `messaging.*` semconv attributes.
-version: 0.2.0-wip
+version: 0.2.0
 repository: https://github.com/dartastic/otel_web_socket_channel
 homepage: https://dartastic.io
 
