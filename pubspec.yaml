@@ -3,7 +3,7 @@ description: >-
   OpenTelemetry instrumentation for web_socket_channel by Dartastic.io. Adds
   standard OpenTelemetry observability to applications that use
   web_socket_channel.
-version: 0.2.1-wip
+version: 0.2.1
 repository: https://github.com/dartastic/otel_web_socket_channel
 homepage: https://dartastic.io
 
